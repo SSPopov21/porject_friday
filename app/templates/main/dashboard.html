@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="glass-card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <h2>Dashboard</h2>
+        <span>Welcome, {{ current_user.username }}</span>
+    </div>
+
+    <div style="height: 400px; margin-bottom: 2rem;">
+        <canvas id="airQualityChart"></canvas>
+    </div>
+
+    <h3>Recent Readings</h3>
+    <div style="overflow-x: auto;">
+        <table>
+            <thead>
+                <tr>
+                    <th>Timestamp</th>
+                    <th>PM2.5</th>
+                    <th>PM10</th>
+                    <th>CO2</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in data %}
+                <tr>
+                    <td>{{ entry.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
+                    <td>{{ entry.pm25 }}</td>
+                    <td>{{ entry.pm10 }}</td>
+                    <td>{{ entry.co2 }}</td>
+                    <td>
+                        {% if entry.anomaly_score and entry.anomaly_score > 0.8 %}
+                        <span style="color: #ff6b6b; font-weight: bold;">Anomaly</span>
+                        {% else %}
+                        <span style="color: #2ecc71; font-weight: bold;">Normal</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    // Fetch data from API for the chart
+    fetch('/api/data')
+        .then(response => response.json())
+        .then(data => {
+            const ctx = document.getElementById('airQualityChart').getContext('2d');
+            const labels = data.map(entry => new Date(entry.timestamp).toLocaleTimeString());
+            const pm25Data = data.map(entry => entry.pm25);
+            const co2Data = data.map(entry => entry.co2);
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels.reverse(),
+                    datasets: [{
+                        label: 'PM2.5',
+                        data: pm25Data.reverse(),
+                        borderColor: '#a29bfe',
+                        backgroundColor: 'rgba(162, 155, 254, 0.2)',
+                        fill: true,
+                        tension: 0.4
+                    }, {
+                        label: 'CO2',
+                        data: co2Data.reverse(),
+                        borderColor: '#6c5ce7',
+                        backgroundColor: 'rgba(108, 92, 231, 0.2)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: 'white'
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: 'white' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        },
+                        y: {
+                            ticks: { color: 'white' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        }
+                    }
+                }
+            });
+        });
+</script>
+{% endblock %}
