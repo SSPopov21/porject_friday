@@ -20,3 +20,11 @@ class UpdateAccountForm(FlaskForm):
             user = User.query.filter_by(email=email.data).first()
             if user:
                 raise ValidationError('That email is already in use. Please choose a different one.')
+
+from wtforms import FloatField
+
+class DataForm(FlaskForm):
+    pm25 = FloatField('PM2.5', validators=[DataRequired()])
+    pm10 = FloatField('PM10', validators=[DataRequired()])
+    co2 = FloatField('CO2 (ppm)', validators=[DataRequired()])
+    submit = SubmitField('Add Reading')
