@@ -10,7 +10,6 @@ def make_shell_context():
 
 if __name__ == '__main__':
     import logging
-    # Ensure werkzeug logs are visible
-    log = logging.getLogger('werkzeug')
-    log.setLevel(logging.INFO)
+    # Configure global logging to ensure all requests are shown
+    logging.basicConfig(level=logging.INFO)
     app.run(debug=True)
