@@ -9,4 +9,8 @@ def make_shell_context():
     return {'db': db, 'User': User, 'AirQualityData': AirQualityData}
 
 if __name__ == '__main__':
+    import logging
+    # Ensure werkzeug logs are visible
+    log = logging.getLogger('werkzeug')
+    log.setLevel(logging.INFO)
     app.run(debug=True)
